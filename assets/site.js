@@ -41,21 +41,6 @@
     rdv.forEach(function (r) { var ok = !montre && r.dataset.fin >= aujourdhui; r.hidden = !ok; if (ok) montre = true; });
   }
 
-  // ── le parcours : l'étape qui passe au milieu de l'écran allume sa photo ──
-  var parcours = document.querySelector('[data-parcours]');
-  if (parcours && 'IntersectionObserver' in window) {
-    var etapes = parcours.querySelectorAll('.parcours__etape');
-    var images = parcours.querySelectorAll('.parcours__image');
-    var allumer = function (n) {
-      etapes.forEach(function (el, k) { el.classList.toggle('est-active', k === n); });
-      images.forEach(function (el, k) { el.classList.toggle('est-active', k === n); });
-    };
-    var po = new IntersectionObserver(function (entrees) {
-      entrees.forEach(function (e) { if (e.isIntersecting) allumer(Array.prototype.indexOf.call(etapes, e.target)); });
-    }, { rootMargin: '-48% 0px -48% 0px' });
-    etapes.forEach(function (el) { po.observe(el); });
-  }
-
   // ── vidéos de l'atelier : chargées et lancées quand elles arrivent à l'écran ──
   var videos = document.querySelectorAll('video[data-src]');
   if (videos.length && 'IntersectionObserver' in window) {
@@ -77,6 +62,10 @@
   if (form) {
     var d = form.dataset, retour = form.querySelector('.formulaire__retour'), envoyer = form.querySelector('[type=submit]');
     var oeuvre = new URLSearchParams(location.search).get('oeuvre');
+    var anglais = d.lang === 'en';
+    var L = anglais
+      ? { nom: 'Name', tel: 'Phone', email: 'Email', oeuvre: 'Painting', sujet: 'Message for Le Yack (leyack.fr)' }
+      : { nom: 'Nom', tel: 'Téléphone', email: 'E-mail', oeuvre: 'Œuvre', sujet: 'Message pour Le Yack (leyack.fr)' };
     if (oeuvre) form.message.value = d.aPropos.replace('{oeuvre}', oeuvre);
     var dire = function (texte) { retour.textContent = texte; retour.hidden = false; };
     form.addEventListener('submit', function (ev) {
@@ -91,7 +80,7 @@
       if (form.message.value.trim().length < 10) { form.message.setAttribute('aria-invalid', 'true'); dire(d.court); return; }
       var corps = {
         intent: 1, name: form.nom.value.trim(), email: form.email.value.trim(), phone: form.tel.value.trim(),
-        message: 'Message envoyé depuis leyack.fr\n\n' + form.message.value.trim(),
+        message: (anglais ? 'Message envoyé depuis leyack.fr, version anglaise : répondre en anglais' : 'Message envoyé depuis leyack.fr') + '\n\n' + form.message.value.trim(),
         artist: 'Le Yack', artwork: oeuvre || null, budget: null, status: 'new'
       };
       var entetes = { 'Content-Type': 'application/json', apikey: d.cle, Authorization: 'Bearer ' + d.cle };
@@ -105,8 +94,9 @@
         .then(function () { form.reset(); dire(d.merci); })
         .catch(function () {
           dire(d.erreur);
-          var texte = 'Nom : ' + corps.name + '\nTéléphone : ' + corps.phone + '\nE-mail : ' + corps.email + (oeuvre ? '\nŒuvre : ' + oeuvre : '') + '\n\n' + form.message.value.trim();
-          location.href = 'mailto:' + d.repli + '?subject=' + encodeURIComponent('Message pour Le Yack (leyack.fr)') + '&body=' + encodeURIComponent(texte);
+          var sep = anglais ? ': ' : ' : ';
+          var texte = L.nom + sep + corps.name + '\n' + L.tel + sep + corps.phone + '\n' + L.email + sep + corps.email + (oeuvre ? '\n' + L.oeuvre + sep + oeuvre : '') + '\n\n' + form.message.value.trim();
+          location.href = 'mailto:' + d.repli + '?subject=' + encodeURIComponent(L.sujet) + '&body=' + encodeURIComponent(texte);
         })
         .then(function () { envoyer.disabled = false; envoyer.textContent = libelle; });
     });
@@ -116,13 +106,21 @@
   document.querySelectorAll('[data-rail]').forEach(function (rail) {
     var fl = document.querySelector('[data-rail-fleches="' + rail.id + '"]');
     if (!fl) return;
-    fl.querySelectorAll('button').forEach(function (b) {
+    var g = fl.querySelector('[data-sens="g"]'), d = fl.querySelector('[data-sens="d"]');
+    var etat = function () {
+      var max = rail.scrollWidth - rail.clientWidth;
+      g.disabled = rail.scrollLeft <= 2; d.disabled = rail.scrollLeft >= max - 2;
+      fl.hidden = max <= 2;
+    };
+    [g, d].forEach(function (b) {
       b.addEventListener('click', function () {
-        var carte = rail.querySelector('.carte');
-        var pas = carte ? carte.getBoundingClientRect().width + 22 : 400;
-        rail.scrollBy({ left: (b.dataset.sens === 'g' ? -1 : 1) * pas, behavior: calme ? 'auto' : 'smooth' });
+        var pas = rail.firstElementChild ? rail.firstElementChild.getBoundingClientRect().width : 400;
+        rail.scrollBy({ left: (b === g ? -1 : 1) * pas, behavior: calme ? 'auto' : 'smooth' });
       });
     });
+    rail.addEventListener('scroll', etat, { passive: true });
+    window.addEventListener('resize', etat);
+    etat();
   });
 
   // ── apparitions au défilement ──

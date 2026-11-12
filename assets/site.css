@@ -31,7 +31,7 @@ a:hover { text-decoration-color: var(--rouge); }
 /* ── en-tête : toujours visible, souligné d'un coup de pinceau ── */
 .tete { position: sticky; top: 0; z-index: 40; background: rgba(255, 255, 255, .95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   padding: calc(16px + env(safe-area-inset-top, 0px)) var(--gd) 16px var(--g); border-bottom: 1px solid var(--trait);
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px 40px; }
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 12px 28px; }
 .tete__logo { display: block; width: 108px; color: var(--encre); }
 .tete__logo svg { width: 100%; height: auto; display: block; }
 .nav { display: flex; align-items: center; justify-content: center; gap: clamp(22px, 3vw, 44px); }
@@ -40,15 +40,24 @@ a:hover { text-decoration-color: var(--rouge); }
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M1 7.5C14 4 28 9.5 44 6.5S78 3 96 5.5 114 6 119 4.5L118.5 8C108 9.5 94 10.5 78 9.5S50 10.5 34 10 12 9.5 2 11Z' fill='%23b3261e'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
   transform: scaleX(0); transform-origin: left center; transition: transform .45s cubic-bezier(.65, 0, .35, 1); }
 .nav a:hover::after, .nav a[aria-current="page"]::after { transform: scaleX(1); }
-.tete__contact { padding: 10px 18px; font-size: 14px; }
+.tete .tete__contact { padding: 10px 18px; font-size: 14px; }
+/* sélecteur de langue : FR | EN, la langue de la page en noir soulignée de rouge */
+.langues { display: flex; align-items: center; font-size: 13px; letter-spacing: .08em; font-weight: 500; }
+.langues a { position: relative; padding: 8px 7px; color: var(--gris); text-decoration: none; transition: color .2s ease; }
+.langues a + a { border-left: 1px solid var(--trait); }
+.langues a:hover { color: var(--encre); }
+.langues a[aria-current="true"] { color: var(--encre); }
+.langues a[aria-current="true"]::after { content: ""; position: absolute; left: 7px; right: 7px; bottom: 3px; height: 2px; background: var(--rouge); }
 @media (max-width: 860px) {
-  .tete { grid-template-columns: minmax(0, 1fr) auto; padding-bottom: 0; }
+  .tete { grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px 14px; padding-bottom: 0; }
   .tete__logo { width: 96px; }
   .nav { grid-column: 1 / -1; grid-row: 2; justify-content: space-between; gap: 18px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gd)) 0 calc(-1 * var(--g)); padding: 4px var(--gd) 10px var(--g); }
   .nav::-webkit-scrollbar { display: none; }
   .nav a { font-size: 18px; }
 }
+@media (max-width: 420px) { .tete { gap: 10px 8px; } .tete__logo { width: 84px; } .tete .tete__contact { padding: 9px 12px; font-size: 13px; } .langues a { padding: 8px 5px; } .langues a[aria-current="true"]::after { left: 5px; right: 5px; } }
 @media (max-width: 380px) { .nav { justify-content: flex-start; } }
+@media (max-width: 340px) { .tete__logo { width: 68px; } .tete .tete__contact { padding: 8px 9px; font-size: 12px; } .langues { font-size: 12px; } .langues a { padding: 8px 4px; } }
 
 /* ── boutons et liens ────────────────────────────────── */
 .bouton { display: inline-flex; align-items: center; gap: 10px; padding: 14px 24px; background: var(--rouge); color: #fff; border: 1px solid var(--rouge); font-size: 15px; font-weight: 500; letter-spacing: .01em; text-decoration: none; transition: background .2s ease; }
@@ -129,39 +138,27 @@ a:hover { text-decoration-color: var(--rouge); }
 .citation::after { content: " »"; color: var(--rouge); }
 .citation__signe { margin: 22px 0 0; text-align: center; font-size: 15px; color: var(--gris); }
 
-/* parcours en quatre temps : à gauche une photo qui reste à l'écran et change d'étape en étape, à droite le récit */
-.parcours { margin: 64px 0 0; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(40px, 6vw, 100px); align-items: start; }
-.parcours__cadre { position: sticky; top: 118px; width: 100%; aspect-ratio: 4 / 5; max-height: calc(100vh - 150px); overflow: hidden; background: var(--trait); box-shadow: 0 30px 60px -36px rgba(20, 20, 20, .45); }
-.parcours__image { position: absolute; inset: 0; opacity: 0; transform: scale(1.045); transition: opacity .9s ease, transform 1.6s cubic-bezier(.2, .7, .2, 1); }
-.parcours__image.est-active { opacity: 1; transform: none; }
+/* parcours en quatre temps : une frise qui défile à l'horizontale (flèches, glisser, trackpad), un trait continu et un point rouge par étape */
+.parcours { margin: 56px 0 0; }
+.parcours__rail { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: calc(100% / 2.6);
+  overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; overscroll-behavior-x: contain; scrollbar-width: none; }
+.parcours__rail::-webkit-scrollbar { display: none; }
+.parcours__rail:focus-visible { outline-offset: 6px; }
+.parcours__etape { position: relative; scroll-snap-align: start; border-top: 1px solid var(--encre); padding: 22px 40px 4px 0; }
+.parcours__etape::before { content: ""; position: absolute; left: 0; top: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--rouge); }
+.parcours .quand { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--rouge); margin: 0 0 18px; }
+.parcours__image { aspect-ratio: 1; overflow: hidden; background: var(--trait); }
 .parcours__image picture, .parcours__image img { width: 100%; height: 100%; }
-.parcours__image img { object-fit: cover; }
-.parcours__etapes { list-style: none; margin: 0; padding: 0; }
-.parcours__etape { position: relative; min-height: 46vh; display: flex; flex-direction: column; justify-content: center; padding: 36px 0 36px 36px; border-left: 2px solid var(--trait); color: var(--gris); transition: color .5s ease; }
-.parcours__etape::before { content: ""; position: absolute; left: -2px; top: 0; bottom: 0; width: 2px; background: var(--rouge); transform: scaleY(0); transform-origin: top; transition: transform .7s cubic-bezier(.2, .7, .2, 1); }
-.parcours__etape.est-active::before { transform: none; }
-.parcours .quand { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--gris); margin: 0 0 10px; }
-.parcours__etape.est-active .quand { color: var(--rouge); }
-.parcours h3 { margin: 0 0 12px; font-family: var(--serif); font-weight: 400; font-size: clamp(30px, 3.3vw, 46px); line-height: 1.1; color: inherit; transition: color .5s ease; }
-.parcours__etape p:last-child { margin: 0; font-size: 18px; line-height: 1.6; max-width: 44ch; }
-.parcours__etape.est-active, html:not(.js) .parcours__etape { color: var(--texte); }
-.parcours__etape.est-active h3, html:not(.js) .parcours__etape h3 { color: var(--encre); }
-.parcours__mobile { display: none; }
-@media (prefers-reduced-motion: reduce) { .parcours__image, .parcours__etape, .parcours__etape::before { transition: none; } .parcours__image { transform: none; } }
-@media (max-width: 900px) {
-  .parcours { grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 44px; }
-  .parcours__cadre { display: none; }
-  .parcours__etapes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 24px; }
-  .parcours__etape { min-height: 0; padding: 0; border: 0; color: var(--texte); }
-  .parcours__etape::before { display: none; }
-  .parcours__etape h3 { color: var(--encre); font-size: 30px; }
-  .parcours__etape .quand { color: var(--rouge); }
-  .parcours__mobile { display: block; margin-bottom: 18px; }
-  .parcours__mobile img { width: 100%; aspect-ratio: 1; object-fit: cover; }
-  .parcours__etape:nth-child(4) .parcours__mobile img { object-position: 50% 100%; }
-  .parcours__etape p:last-child { font-size: 17px; }
-}
-@media (max-width: 560px) { .parcours__etapes { grid-template-columns: minmax(0, 1fr); gap: 44px; } }
+.parcours__image img { object-fit: cover; object-position: var(--pos, 50% 50%); }
+.parcours h3 { margin: 22px 0 10px; font-family: var(--serif); font-weight: 400; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.15; color: var(--encre); }
+.parcours__etape > p:last-child { margin: 0; font-size: 16px; line-height: 1.6; color: var(--texte); max-width: 40ch; }
+.fleches { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; }
+.fleches button { width: 48px; height: 48px; border: 1px solid var(--encre); background: transparent; color: var(--encre); font-size: 18px; cursor: pointer; transition: background .2s ease, color .2s ease, opacity .2s ease; }
+.fleches button:hover:not(:disabled) { background: var(--encre); color: #fff; }
+.fleches button:disabled { opacity: .25; cursor: default; }
+@media (prefers-reduced-motion: reduce) { .parcours__rail { scroll-behavior: auto; } }
+@media (max-width: 900px) { .parcours__rail { grid-auto-columns: calc(100% / 1.7); } }
+@media (max-width: 600px) { .parcours__rail { grid-auto-columns: 84%; } .parcours__etape { padding-right: 22px; } .parcours { margin-top: 40px; } }
 
 /* œuvres : accrochage */
 .grille-oeuvres { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 60px 36px; align-items: end; }
