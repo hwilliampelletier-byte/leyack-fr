@@ -129,15 +129,39 @@ a:hover { text-decoration-color: var(--rouge); }
 .citation::after { content: " »"; color: var(--rouge); }
 .citation__signe { margin: 22px 0 0; text-align: center; font-size: 15px; color: var(--gris); }
 
-/* parcours en quatre temps */
-.parcours { list-style: none; margin: 60px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; }
-.parcours li { border-top: 2px solid var(--encre); padding-top: 18px; }
-.parcours li:last-child { border-color: var(--rouge); }
-.parcours .quand { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--gris); margin: 0 0 8px; }
-.parcours h3 { margin: 0 0 8px; font-family: var(--serif); font-weight: 500; font-size: 24px; line-height: 1.2; color: var(--encre); }
-.parcours p { margin: 0; font-size: 16px; line-height: 1.55; color: var(--texte); }
-@media (max-width: 900px) { .parcours { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .parcours { grid-template-columns: minmax(0, 1fr); } }
+/* parcours en quatre temps : à gauche une photo qui reste à l'écran et change d'étape en étape, à droite le récit */
+.parcours { margin: 64px 0 0; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(40px, 6vw, 100px); align-items: start; }
+.parcours__cadre { position: sticky; top: 118px; width: 100%; aspect-ratio: 4 / 5; max-height: calc(100vh - 150px); overflow: hidden; background: var(--trait); box-shadow: 0 30px 60px -36px rgba(20, 20, 20, .45); }
+.parcours__image { position: absolute; inset: 0; opacity: 0; transform: scale(1.045); transition: opacity .9s ease, transform 1.6s cubic-bezier(.2, .7, .2, 1); }
+.parcours__image.est-active { opacity: 1; transform: none; }
+.parcours__image picture, .parcours__image img { width: 100%; height: 100%; }
+.parcours__image img { object-fit: cover; }
+.parcours__etapes { list-style: none; margin: 0; padding: 0; }
+.parcours__etape { position: relative; min-height: 46vh; display: flex; flex-direction: column; justify-content: center; padding: 36px 0 36px 36px; border-left: 2px solid var(--trait); color: var(--gris); transition: color .5s ease; }
+.parcours__etape::before { content: ""; position: absolute; left: -2px; top: 0; bottom: 0; width: 2px; background: var(--rouge); transform: scaleY(0); transform-origin: top; transition: transform .7s cubic-bezier(.2, .7, .2, 1); }
+.parcours__etape.est-active::before { transform: none; }
+.parcours .quand { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--gris); margin: 0 0 10px; }
+.parcours__etape.est-active .quand { color: var(--rouge); }
+.parcours h3 { margin: 0 0 12px; font-family: var(--serif); font-weight: 400; font-size: clamp(30px, 3.3vw, 46px); line-height: 1.1; color: inherit; transition: color .5s ease; }
+.parcours__etape p:last-child { margin: 0; font-size: 18px; line-height: 1.6; max-width: 44ch; }
+.parcours__etape.est-active, html:not(.js) .parcours__etape { color: var(--texte); }
+.parcours__etape.est-active h3, html:not(.js) .parcours__etape h3 { color: var(--encre); }
+.parcours__mobile { display: none; }
+@media (prefers-reduced-motion: reduce) { .parcours__image, .parcours__etape, .parcours__etape::before { transition: none; } .parcours__image { transform: none; } }
+@media (max-width: 900px) {
+  .parcours { grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 44px; }
+  .parcours__cadre { display: none; }
+  .parcours__etapes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 24px; }
+  .parcours__etape { min-height: 0; padding: 0; border: 0; color: var(--texte); }
+  .parcours__etape::before { display: none; }
+  .parcours__etape h3 { color: var(--encre); font-size: 30px; }
+  .parcours__etape .quand { color: var(--rouge); }
+  .parcours__mobile { display: block; margin-bottom: 18px; }
+  .parcours__mobile img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .parcours__etape:nth-child(4) .parcours__mobile img { object-position: 50% 100%; }
+  .parcours__etape p:last-child { font-size: 17px; }
+}
+@media (max-width: 560px) { .parcours__etapes { grid-template-columns: minmax(0, 1fr); gap: 44px; } }
 
 /* œuvres : accrochage */
 .grille-oeuvres { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 60px 36px; align-items: end; }
@@ -215,7 +239,8 @@ a:hover { text-decoration-color: var(--rouge); }
 .caracteristiques { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 26px; font-size: 15px; padding-top: 20px; border-top: 1px solid var(--trait); }
 .caracteristiques dt { color: var(--gris); }
 .caracteristiques dd { margin: 0; }
-.planches { max-width: var(--large); margin: 90px auto 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+.planches { --n: 4; max-width: var(--large); margin: 90px auto 0; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 18px; }
+.planches--1 { --n: 1; max-width: 520px; } .planches--2 { --n: 2; } .planches--3 { --n: 3; }
 .planches figure { margin: 0; }
 .planches img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: var(--fond-2); }
 .planches figcaption { font-size: 14px; color: var(--gris); margin-top: 10px; line-height: 1.45; }
@@ -288,14 +313,20 @@ a:hover { text-decoration-color: var(--rouge); }
 .video video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* ── section Atelier Joconde ─────────────────────────── */
-.atelier { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(36px, 6vw, 90px); align-items: center; }
-.atelier figure { margin: 0; }
-.atelier figure img { width: 100%; }
-.atelier__trois { list-style: none; margin: 28px 0 34px; padding: 0; border-top: 1px solid var(--trait); }
-.atelier__trois li { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--trait); align-items: baseline; }
-.atelier__trois b { font-family: var(--serif); font-weight: 500; font-size: 22px; color: var(--encre); }
-.atelier__trois span { font-size: 15px; color: var(--gris); }
-@media (max-width: 860px) { .atelier { grid-template-columns: minmax(0, 1fr); } .atelier__trois li { grid-template-columns: 120px minmax(0, 1fr); } }
+/* l'Atelier Joconde : un triptyque, une toile de chacun des trois peintres, celle du milieu décalée */
+.atelier__tete { max-width: 760px; margin: 0 auto; text-align: center; }
+.atelier__tete .chapeau { margin-left: auto; margin-right: auto; }
+.trio { list-style: none; margin: 70px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 60px); align-items: start; }
+.trio li:nth-child(2) { margin-top: 90px; }
+.trio__image { display: block; background: var(--fond-2); padding: clamp(18px, 2.4vw, 34px); text-decoration: none; }
+.trio__image img { width: 100%; aspect-ratio: 1; object-fit: cover; box-shadow: 0 22px 40px -22px rgba(20, 20, 20, .55); transition: transform .6s cubic-bezier(.2, .7, .2, 1); }
+.trio__image:hover img { transform: translateY(-4px); }
+.trio__toile { margin: 14px 0 0; font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--gris); }
+.trio h3 { margin: 18px 0 6px; font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 2.6vw, 36px); line-height: 1.1; color: var(--encre); }
+.trio p:not(.trio__toile) { margin: 0 0 14px; font-size: 16px; line-height: 1.55; color: var(--texte); max-width: 34ch; }
+.atelier__cta { margin: 64px 0 0; }
+@media (max-width: 900px) { .trio li:nth-child(2) { margin-top: 50px; } }
+@media (max-width: 600px) { .trio { grid-template-columns: minmax(0, 1fr); gap: 44px; margin-top: 44px; } .trio li:nth-child(2) { margin-top: 0; } }
 
 /* ── contact avec photo ──────────────────────────────── */
 .contact-photo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(36px, 6vw, 90px); align-items: center; }
@@ -375,7 +406,10 @@ a:hover { text-decoration-color: var(--rouge); }
   .fiche__mot { font-size: 19px; }
   .caracteristiques { grid-template-columns: minmax(0, 1fr); gap: 2px 0; }
   .caracteristiques dd { margin-bottom: 10px; }
-  .planches { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 60px; }
+  .planches, .planches--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 60px; }
+  .planches--1 { grid-template-columns: minmax(0, 1fr); }
+  .planches--3 figure:last-child { grid-column: 1 / -1; }
+  .planches--3 figure:last-child img { aspect-ratio: 16 / 10; }
   .planches figcaption { display: none; }
   .mot-artiste { grid-template-columns: 110px minmax(0, 1fr); gap: 20px; }
   .mot-artiste img { width: 110px; height: 140px; }
@@ -383,3 +417,13 @@ a:hover { text-decoration-color: var(--rouge); }
   .fiche__actions .bouton { flex: 1 1 100%; justify-content: center; }
   .suite a span { font-size: 20px; }
 }
+
+/* le collage de fin de page (repris de l'ancien leyack.fr) : bord à bord, sans marge, colonnes de même hauteur */
+.collage { display: grid; width: 100%; grid-template-rows: minmax(0, 1fr); background: var(--encre); }
+.collage--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.collage--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); display: none; }
+.collage__col { display: flex; flex-direction: column; min-height: 0; }
+.collage figure { position: relative; margin: 0; flex-basis: 0; min-height: 0; overflow: hidden; }
+.collage picture { position: absolute; inset: 0; }
+.collage img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 760px) { .collage--3 { display: none; } .collage--2 { display: grid; } }

@@ -41,6 +41,21 @@
     rdv.forEach(function (r) { var ok = !montre && r.dataset.fin >= aujourdhui; r.hidden = !ok; if (ok) montre = true; });
   }
 
+  // ── le parcours : l'étape qui passe au milieu de l'écran allume sa photo ──
+  var parcours = document.querySelector('[data-parcours]');
+  if (parcours && 'IntersectionObserver' in window) {
+    var etapes = parcours.querySelectorAll('.parcours__etape');
+    var images = parcours.querySelectorAll('.parcours__image');
+    var allumer = function (n) {
+      etapes.forEach(function (el, k) { el.classList.toggle('est-active', k === n); });
+      images.forEach(function (el, k) { el.classList.toggle('est-active', k === n); });
+    };
+    var po = new IntersectionObserver(function (entrees) {
+      entrees.forEach(function (e) { if (e.isIntersecting) allumer(Array.prototype.indexOf.call(etapes, e.target)); });
+    }, { rootMargin: '-48% 0px -48% 0px' });
+    etapes.forEach(function (el) { po.observe(el); });
+  }
+
   // ── vidéos de l'atelier : chargées et lancées quand elles arrivent à l'écran ──
   var videos = document.querySelectorAll('video[data-src]');
   if (videos.length && 'IntersectionObserver' in window) {
