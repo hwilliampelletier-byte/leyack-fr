@@ -34,6 +34,29 @@
     }, 5200);
   }
 
+  // ── le prochain rendez-vous : le premier dont la date n'est pas passée ──
+  var rdv = document.querySelectorAll('.rendez-vous[data-fin]');
+  if (rdv.length) {
+    var aujourdhui = new Date().toISOString().slice(0, 10), montre = false;
+    rdv.forEach(function (r) { var ok = !montre && r.dataset.fin >= aujourdhui; r.hidden = !ok; if (ok) montre = true; });
+  }
+
+  // ── vidéos de l'atelier : chargées et lancées quand elles arrivent à l'écran ──
+  var videos = document.querySelectorAll('video[data-src]');
+  if (videos.length && 'IntersectionObserver' in window) {
+    var mobile = window.matchMedia('(max-width: 760px)').matches;
+    var vo = new IntersectionObserver(function (entrees) {
+      entrees.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) {
+          if (!v.src) { v.src = mobile && v.dataset.srcMobile ? v.dataset.srcMobile : v.dataset.src; }
+          if (!calme) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+        } else if (!v.paused) v.pause();
+      });
+    }, { rootMargin: '200px 0px' });
+    videos.forEach(function (v) { if (calme) v.controls = true; vo.observe(v); });
+  }
+
   // ── rail des dernières toiles ──
   document.querySelectorAll('[data-rail]').forEach(function (rail) {
     var fl = document.querySelector('[data-rail-fleches="' + rail.id + '"]');
