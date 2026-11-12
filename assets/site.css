@@ -62,7 +62,7 @@ a:hover { text-decoration-color: var(--rouge); }
 .portrait__sur { margin: 0 0 18px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--rouge); font-weight: 600; }
 .signature { margin: 0 0 26px; width: min(420px, 82vw); color: var(--encre); }
 .signature svg { width: 100%; height: auto; display: block; }
-.portrait__bio { margin: 0 0 30px; font-family: var(--serif); font-size: clamp(21px, 2vw, 25px); line-height: 1.5; color: var(--encre); font-weight: 400; text-wrap: pretty; }
+.portrait__bio { margin: 0 0 34px; font-family: var(--serif); font-size: clamp(21px, 2vw, 25px); line-height: 1.5; color: var(--encre); font-weight: 400; text-wrap: pretty; }
 .portrait__bio em { font-style: italic; }
 .faits { list-style: none; margin: 0 0 34px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--trait); }
 .faits li { padding: 16px 16px 0 0; }
@@ -76,10 +76,10 @@ a:hover { text-decoration-color: var(--rouge); }
 .portrait__legende { position: absolute; left: 0; bottom: 0; margin: 0; padding: 10px 14px; background: rgba(255, 255, 255, .92); font-size: 13px; color: var(--gris); }
 @media (prefers-reduced-motion: no-preference) {
   .signature svg { -webkit-mask-image: linear-gradient(90deg, #000 45%, transparent 55%); mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
-    -webkit-mask-size: 260% 100%; mask-size: 260% 100%; animation: signer 2s cubic-bezier(.65, 0, .35, 1) .3s both; }
-  .portrait__sur, .portrait__bio, .faits, .portrait .actions { animation: venir 1.1s cubic-bezier(.2, .7, .2, 1) both; }
-  .portrait__sur { animation-delay: .1s; } .portrait__bio { animation-delay: 1.2s; } .faits { animation-delay: 1.45s; } .portrait .actions { animation-delay: 1.65s; }
-  .portrait__photos { animation: rideau 1.6s cubic-bezier(.7, 0, .2, 1) .2s both; }
+    -webkit-mask-size: 260% 100%; mask-size: 260% 100%; animation: signer 1.1s cubic-bezier(.65, 0, .35, 1) .1s both; }
+  .portrait__sur, .portrait__bio, .faits, .portrait .actions { animation: venir .8s cubic-bezier(.2, .7, .2, 1) both; }
+  .portrait__sur { animation-delay: 0s; } .portrait__bio { animation-delay: .55s; } .portrait .actions { animation-delay: .75s; }
+  .portrait__photos { animation: rideau 1s cubic-bezier(.7, 0, .2, 1) .05s both; }
 }
 @media (prefers-reduced-motion: reduce) { .portrait__photo.est-active img { animation: none; } }
 @keyframes signer { from { -webkit-mask-position: 100% 0; mask-position: 100% 0; } to { -webkit-mask-position: 0 0; mask-position: 0 0; } }
