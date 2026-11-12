@@ -138,27 +138,37 @@ a:hover { text-decoration-color: var(--rouge); }
 .citation::after { content: " »"; color: var(--rouge); }
 .citation__signe { margin: 22px 0 0; text-align: center; font-size: 15px; color: var(--gris); }
 
-/* parcours en quatre temps : une frise qui défile à l'horizontale (flèches, glisser, trackpad), un trait continu et un point rouge par étape */
-.parcours { margin: 56px 0 0; }
-.parcours__rail { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: calc(100% / 2.6);
-  overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; overscroll-behavior-x: contain; scrollbar-width: none; }
-.parcours__rail::-webkit-scrollbar { display: none; }
-.parcours__rail:focus-visible { outline-offset: 6px; }
-.parcours__etape { position: relative; scroll-snap-align: start; border-top: 1px solid var(--encre); padding: 22px 40px 4px 0; }
-.parcours__etape::before { content: ""; position: absolute; left: 0; top: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--rouge); }
-.parcours .quand { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--rouge); margin: 0 0 18px; }
-.parcours__image { aspect-ratio: 1; overflow: hidden; background: var(--trait); }
+/* parcours en quatre temps : les quatre étapes visibles d'un coup, sur un trait qui se dessine à l'arrivée,
+   puis les étapes qui apparaissent l'une après l'autre (un seul moment animé) */
+.parcours { list-style: none; margin: 60px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 clamp(18px, 2.4vw, 34px); position: relative; }
+.parcours::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--encre); transform-origin: left center; }
+.parcours__etape { position: relative; padding-top: 24px; min-width: 0; }
+.parcours__etape::before { content: ""; position: absolute; left: 0; top: -4px; width: 9px; height: 9px; border-radius: 50%; background: var(--rouge); }
+.parcours .quand { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--rouge); font-weight: 600; margin: 0 0 16px; }
+.parcours__image { aspect-ratio: 4 / 5; overflow: hidden; background: var(--trait); }
 .parcours__image picture, .parcours__image img { width: 100%; height: 100%; }
-.parcours__image img { object-fit: cover; object-position: var(--pos, 50% 50%); }
-.parcours h3 { margin: 22px 0 10px; font-family: var(--serif); font-weight: 400; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.15; color: var(--encre); }
-.parcours__etape > p:last-child { margin: 0; font-size: 16px; line-height: 1.6; color: var(--texte); max-width: 40ch; }
-.fleches { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; }
-.fleches button { width: 48px; height: 48px; border: 1px solid var(--encre); background: transparent; color: var(--encre); font-size: 18px; cursor: pointer; transition: background .2s ease, color .2s ease, opacity .2s ease; }
-.fleches button:hover:not(:disabled) { background: var(--encre); color: #fff; }
-.fleches button:disabled { opacity: .25; cursor: default; }
-@media (prefers-reduced-motion: reduce) { .parcours__rail { scroll-behavior: auto; } }
-@media (max-width: 900px) { .parcours__rail { grid-auto-columns: calc(100% / 1.7); } }
-@media (max-width: 600px) { .parcours__rail { grid-auto-columns: 84%; } .parcours__etape { padding-right: 22px; } .parcours { margin-top: 40px; } }
+.parcours__image img { object-fit: cover; object-position: var(--pos, 50% 50%); transition: transform 1.2s cubic-bezier(.2, .7, .2, 1); }
+.parcours__etape:hover .parcours__image img { transform: scale(1.04); }
+.parcours h3 { margin: 20px 0 8px; font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 2vw, 28px); line-height: 1.15; color: var(--encre); }
+.parcours__etape > p:last-child { margin: 0; font-size: 15.5px; line-height: 1.6; color: var(--texte); }
+@media (prefers-reduced-motion: no-preference) {
+  html.js .parcours.revele::before { transform: scaleX(0); transition: transform 1.1s cubic-bezier(.65, 0, .35, 1); }
+  html.js .parcours.revele.est-vue::before { transform: none; }
+  html.js .parcours.revele .parcours__etape { opacity: 0; transform: translateY(16px); transition: opacity .7s ease, transform .9s cubic-bezier(.2, .7, .2, 1); transition-delay: calc(.35s + var(--i) * .14s); }
+  html.js .parcours.revele.est-vue .parcours__etape { opacity: 1; transform: none; }
+}
+@media (max-width: 900px) {
+  .parcours { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 44px 18px; }
+  .parcours::before { display: none; }
+  .parcours__etape { border-top: 1px solid var(--encre); }
+}
+@media (max-width: 560px) {
+  .parcours { gap: 34px 14px; margin-top: 40px; }
+  .parcours__etape { padding-top: 18px; }
+  .parcours .quand { font-size: 11px; letter-spacing: .1em; margin-bottom: 12px; }
+  .parcours h3 { font-size: 20px; margin-top: 14px; }
+  .parcours__etape > p:last-child { font-size: 14.5px; line-height: 1.5; }
+}
 
 /* œuvres : accrochage */
 .grille-oeuvres { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 60px 36px; align-items: end; }
@@ -293,6 +303,7 @@ a:hover { text-decoration-color: var(--rouge); }
 /* apparitions douces au défilement (visibles si le script ne tourne pas) */
 .js .revele { opacity: 0; transform: translateY(24px); transition: opacity 1s ease, transform 1s cubic-bezier(.2, .7, .2, 1); }
 .js .revele.est-vue { opacity: 1; transform: none; }
+.js .parcours.revele { opacity: 1; transform: none; }  /* le parcours anime son trait et ses étapes lui-même */
 @media (prefers-reduced-motion: reduce) { .js .revele { opacity: 1; transform: none; transition: none; } }
 
 /* ── l'ouverture : le prochain rendez-vous ───────────── */
