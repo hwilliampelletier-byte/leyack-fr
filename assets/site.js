@@ -57,6 +57,46 @@
     videos.forEach(function (v) { if (calme) v.controls = true; vo.observe(v); });
   }
 
+  // ── le formulaire de contact : enregistré par l'Atelier Joconde, qui prévient atelier.joconde@gmail.com ──
+  var form = document.getElementById('formulaire');
+  if (form) {
+    var d = form.dataset, retour = form.querySelector('.formulaire__retour'), envoyer = form.querySelector('[type=submit]');
+    var oeuvre = new URLSearchParams(location.search).get('oeuvre');
+    if (oeuvre) form.message.value = d.aPropos.replace('{oeuvre}', oeuvre);
+    var dire = function (texte) { retour.textContent = texte; retour.hidden = false; };
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      if (form.site.value) return;
+      var champs = ['nom', 'tel', 'email', 'message'], manque = false;
+      champs.forEach(function (n) {
+        var c = form[n], vide = !c.value.trim() || (n === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.value.trim()));
+        c.setAttribute('aria-invalid', vide ? 'true' : 'false'); if (vide) manque = true;
+      });
+      if (manque) { dire(d.requis); return; }
+      if (form.message.value.trim().length < 10) { form.message.setAttribute('aria-invalid', 'true'); dire(d.court); return; }
+      var corps = {
+        intent: 1, name: form.nom.value.trim(), email: form.email.value.trim(), phone: form.tel.value.trim(),
+        message: 'Message envoyé depuis leyack.fr\n\n' + form.message.value.trim(),
+        artist: 'Le Yack', artwork: oeuvre || null, budget: null, status: 'new'
+      };
+      var entetes = { 'Content-Type': 'application/json', apikey: d.cle, Authorization: 'Bearer ' + d.cle };
+      envoyer.disabled = true; var libelle = envoyer.textContent; envoyer.textContent = d.envoi;
+      fetch(d.url + '/rest/v1/contact_messages', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, entetes), body: JSON.stringify(corps) })
+        .then(function (r) { if (!r.ok) throw new Error('enregistrement ' + r.status); })
+        .then(function () {
+          var alerte = Object.assign({}, corps); delete alerte.status;
+          return fetch(d.url + '/functions/v1/send-contact-email', { method: 'POST', headers: entetes, body: JSON.stringify(alerte) }).catch(function () {});
+        })
+        .then(function () { form.reset(); dire(d.merci); })
+        .catch(function () {
+          dire(d.erreur);
+          var texte = 'Nom : ' + corps.name + '\nTéléphone : ' + corps.phone + '\nE-mail : ' + corps.email + (oeuvre ? '\nŒuvre : ' + oeuvre : '') + '\n\n' + form.message.value.trim();
+          location.href = 'mailto:' + d.repli + '?subject=' + encodeURIComponent('Message pour Le Yack (leyack.fr)') + '&body=' + encodeURIComponent(texte);
+        })
+        .then(function () { envoyer.disabled = false; envoyer.textContent = libelle; });
+    });
+  }
+
   // ── rail des dernières toiles ──
   document.querySelectorAll('[data-rail]').forEach(function (rail) {
     var fl = document.querySelector('[data-rail-fleches="' + rail.id + '"]');
